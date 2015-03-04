@@ -4,7 +4,6 @@ using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using GHIElectronics.NETMF.FEZ;
 using GHIElectronics.NETMF.Hardware;
-//using HC_SR04;
 
 
 namespace Robot_v100
@@ -38,10 +37,10 @@ namespace Robot_v100
 
             }
         }
-
-        // Functons here.
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static double GetDistance() // Ping!
         {
             double Distance = 0;
@@ -54,13 +53,16 @@ namespace Robot_v100
                 double inches = sensor.TicksToInches(ticks);
                 double centimeters = inches * 2.54;
                 Debug.Print("Distance CM: " + centimeters);
-                Distance = centimeters;
+                Distance = centimeters; //centimeters
 
             }
-            return Distance; 
-                             
+            return Distance;
+
         }
 
+        /// <summary>
+        /// Servo functions
+        /// </summary>
 
         public static void Forward()
         {
@@ -98,12 +100,18 @@ namespace Robot_v100
             servoL.SetPulse(20 * 1000 * 1000, 1500 * 1000); // left servo reverse
             servoR.SetPulse(20 * 1000 * 1000, 1500 * 1000); // right servo forward
         }
+
+        /// <summary>
+        /// Directive functions
+        /// </summary>
         public static void AlphaProtocol()
         {
             GetDistance();
             double CurrentDistance = GetDistance();
-            
-            if (CurrentDistance < 10)
+            double LeftDistance;
+            double RightDistance;
+
+            if (CurrentDistance < 10) // if distance is less than 10cm...
             {
                 Debug.Print("Distance CM: " + CurrentDistance);
                 Stop();
@@ -112,11 +120,37 @@ namespace Robot_v100
                 Thread.Sleep(1000);
                 RotateLeft();
                 Thread.Sleep(1000);
+                Stop();
+                Thread.Sleep(1000);
+                LeftDistance = GetDistance(); //
+                Thread.Sleep(1000);
+                RotateRight();
+                Thread.Sleep(2000);
+                Stop();
+                Thread.Sleep(1000);
+                RightDistance = GetDistance(); //
+                Thread.Sleep(1000);
+
+                if (LeftDistance > RightDistance)
+                {
+                    RotateLeft();
+                    Thread.Sleep(2000);
+                }
+                //  else
+                //  {
+                //      Forward();
+                //  }
+
             }
             else
             {
                 Forward();
             }
+        }
+
+        public static void BetaProtocol()
+        {
+
         }
     }
 }
