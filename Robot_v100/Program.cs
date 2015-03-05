@@ -18,6 +18,7 @@ namespace Robot_v100
         static PWM servoR = new PWM((PWM.Pin)FEZ_Pin.PWM.Di9); // Right servo control pin
         static PWM servoL = new PWM((PWM.Pin)FEZ_Pin.PWM.Di8); // Left servo control pin
         static HC_SR04 sensor = new HC_SR04((Cpu.Pin)FEZ_Pin.Digital.Di4, (Cpu.Pin)FEZ_Pin.Digital.Di5);
+        static int tock = 500;
 
         public static void Main()
         {
@@ -60,81 +61,43 @@ namespace Robot_v100
 
         }
 
-        /// <summary>
-        /// Servo functions
-        /// </summary>
-
-        public static void Forward()
-        {
-            Debug.Print("Forward");
-            servoL.SetPulse(20 * 1000 * 1000, 1000 * 1000); // left server forward
-            //Thread.Sleep(1000);//wait for a second
-            servoR.SetPulse(20 * 1000 * 1000, 2000 * 1000); // right servo forward
-            //Thread.Sleep(1000);//wait for a second  
-        }
-
-        public static void Reverse()
-        {
-            Debug.Print("Reverse");
-            servoL.SetPulse(20 * 1000 * 1000, 2000 * 1000); // left servo reverse
-            servoR.SetPulse(20 * 1000 * 1000, 1000 * 1000); // right servo revers
-        }
-
-        public static void RotateLeft()
-        {
-            Debug.Print("Left");
-            servoL.SetPulse(20 * 1000 * 1000, 2000 * 1000); // left server forward  
-            servoR.SetPulse(20 * 1000 * 1000, 2000 * 1000); // right servo reverse          
-        }
-
-        public static void RotateRight()
-        {
-            Debug.Print("Right");
-            servoL.SetPulse(20 * 1000 * 1000, 1000 * 1000); // left servo reverse
-            servoR.SetPulse(20 * 1000 * 1000, 1000 * 1000); // right servo forward
-        }
-
-        public static void Stop()
-        {
-            Debug.Print("Stop");
-            servoL.SetPulse(20 * 1000 * 1000, 1500 * 1000); // left servo reverse
-            servoR.SetPulse(20 * 1000 * 1000, 1500 * 1000); // right servo forward
-        }
 
         /// <summary>
         /// Directive functions
         /// </summary>
         public static void AlphaProtocol()
         {
-            GetDistance();
+
             double CurrentDistance = GetDistance();
             double LeftDistance;
             double RightDistance;
-
+            GetDistance();
+            Debug.Print("Distance CM: " + CurrentDistance);
             if (CurrentDistance < 10) // if distance is less than 10cm...
             {
-                Debug.Print("Distance CM: " + CurrentDistance);
-                Stop();
-                Thread.Sleep(1000);
-                Reverse();
-                Thread.Sleep(1000);
-                RotateLeft();
-                Thread.Sleep(1000);
-                Stop();
-                Thread.Sleep(1000);
+
+
+                Move.Stop();
+                Thread.Sleep(tock);
+                Move.Reverse();
+                Thread.Sleep(tock);
+                Move.RotateLeft();
+                Thread.Sleep(tock);
+                Move.Stop();
+                Thread.Sleep(tock);
                 LeftDistance = GetDistance(); //
-                Thread.Sleep(1000);
-                RotateRight();
-                Thread.Sleep(2000);
-                Stop();
-                Thread.Sleep(1000);
+                Thread.Sleep(tock);
+                Move.RotateRight();
+                Thread.Sleep(tock * 2);
+                Move.Stop();
+                Thread.Sleep(tock);
                 RightDistance = GetDistance(); //
-                Thread.Sleep(1000);
+                Thread.Sleep(tock);
 
                 if (LeftDistance > RightDistance)
                 {
-                    RotateLeft();
-                    Thread.Sleep(2000);
+                    Move.RotateLeft();
+                    Thread.Sleep(tock * 2);
                 }
                 //  else
                 //  {
@@ -144,7 +107,7 @@ namespace Robot_v100
             }
             else
             {
-                Forward();
+                Move.Forward();
             }
         }
 
@@ -152,7 +115,52 @@ namespace Robot_v100
         {
 
         }
+
+        class Move
+        {
+            /// <summary>Movement Class.
+            /// here all movement method go.
+            /// </summary>
+            public static void Forward()
+            {
+                Debug.Print("Forward");
+                servoL.SetPulse(20 * 1000 * 1000, 1000 * 1000); // left server forward
+                //Thread.Sleep(1000);//wait for a second
+                servoR.SetPulse(20 * 1000 * 1000, 2000 * 1000); // right servo forward
+                //Thread.Sleep(1000);//wait for a second  
+            }
+
+            public static void Reverse()
+            {
+                Debug.Print("Reverse");
+                servoL.SetPulse(20 * 1000 * 1000, 2000 * 1000); // left servo reverse
+                servoR.SetPulse(20 * 1000 * 1000, 1000 * 1000); // right servo revers
+            }
+
+            public static void RotateLeft()
+            {
+                Debug.Print("Left");
+                servoL.SetPulse(20 * 1000 * 1000, 2000 * 1000); // left server forward  
+                servoR.SetPulse(20 * 1000 * 1000, 2000 * 1000); // right servo reverse          
+            }
+
+            public static void RotateRight()
+            {
+                Debug.Print("Right");
+                servoL.SetPulse(20 * 1000 * 1000, 1000 * 1000); // left servo reverse
+                servoR.SetPulse(20 * 1000 * 1000, 1000 * 1000); // right servo forward
+            }
+
+            public static void Stop()
+            {
+                Debug.Print("Stop");
+                servoL.SetPulse(20 * 1000 * 1000, 1500 * 1000); // left servo reverse
+                servoR.SetPulse(20 * 1000 * 1000, 1500 * 1000); // right servo forward
+            }
+        }
     }
+
+
 }
 /*
  
