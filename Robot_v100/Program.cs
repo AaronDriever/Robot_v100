@@ -61,11 +61,7 @@ namespace Robot_v100
 
         }
 
-
-        /// <summary>
-        /// Directive functions
-        /// </summary>
-        public static void AlphaProtocol()
+        public static void AlphaProtocol() // My first directive
         {
 
             double CurrentDistance = GetDistance();
@@ -73,6 +69,7 @@ namespace Robot_v100
             double RightDistance;
             GetDistance();
             Debug.Print("Distance CM: " + CurrentDistance);
+
             if (CurrentDistance < 10) // if distance is less than 10cm...
             {
 
@@ -111,18 +108,19 @@ namespace Robot_v100
             }
         }
 
-        public static void BetaProtocol()
+        public static void BetaProtocol() // not ready yet
         {
 
         }
 
-        class Move
+        class Move // move class
         {
             /// <summary>Movement Class.
             /// here all movement method go.
             /// </summary>
             public static void Forward()
             {
+                int dur;
                 Debug.Print("Forward");
                 servoL.SetPulse(20 * 1000 * 1000, 1000 * 1000); // left server forward
                 //Thread.Sleep(1000);//wait for a second
@@ -159,9 +157,7 @@ namespace Robot_v100
             }
         }
     }
-
-
 }
 /*
- 
+ The End!
 */
