@@ -3,7 +3,7 @@ using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 
 using System.Threading;
-namespace Robot_v100
+namespace HMC_6343
 {
     public class HMC_6343
     {
@@ -17,18 +17,18 @@ namespace Robot_v100
         //Read buffer
         private byte[] inBuffer = new byte[6]; // Six bytes, MSB followed by LSB for each heading, pitch and roll
 
-        public float Heading
+        public float Heading // Heading in degrees
         {
             get;
             private set;
         }
-        public float Pitch
+        public float Pitch // Pitch angle in degrees
         {
             get;
             private set;
         }
 
-        public float Roll
+        public float Roll // Roll angle in degrees
         {
             get;
             private set;
