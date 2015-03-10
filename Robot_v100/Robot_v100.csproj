@@ -31,10 +31,8 @@
   </PropertyGroup>
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
-    <Compile Include="D2523_GPS.cs" />
     <Compile Include="HC_SR04.cs" />
     <Compile Include="HMC_6343.cs" />
-    <Compile Include="NMEA_0183.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Resources.Designer.cs">

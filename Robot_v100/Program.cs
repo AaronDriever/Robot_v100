@@ -16,8 +16,6 @@ namespace Robot_v100
 {
     using HC_SR04; // HC_SR04 Sonar sensor
     using HMC_6343; // HMC_6343 Compass module
-    using D2523_GPS; // D2523 GPS module
-    using Xbee; // Xbee radio module
     public enum MoveDirection
     {
         Fwd, Back
@@ -35,9 +33,9 @@ namespace Robot_v100
             Robot _parent;
             SonarSensor _sonar;
             HMC_6343 _compass;
-            D2523 _position;
 
-            public Brain(Robot parent, SonarSensor sensor, HMC_6343 compass) // not sure yet
+
+            public Brain(Robot parent, SonarSensor sensor, HMC_6343 compass) // Brain sensor assignments
             {
                 _parent = parent;
                 _sonar = sensor;
@@ -79,13 +77,20 @@ namespace Robot_v100
                     return _compass.Roll;
                 }
             }
+            public double Distance
+            {
+                get
+                {
+                    return _sonar.CurrentDistance;
+                }
+            }
             public void UpdateCompass()
             {
                 _compass.Update();
             }
             public void UpdateRanges()
             {
-                _parent.MyTreads.Stop();
+
             }
         }
         public class Servo
@@ -117,7 +122,7 @@ namespace Robot_v100
             private Robot _parent;
             private Servo _treadR;
             private Servo _treadL;
-            public Treads(Robot parent, FEZ_Pin.PWM left, FEZ_Pin.PWM right)
+            public Treads(Robot parent, FEZ_Pin.PWM left, FEZ_Pin.PWM right) // assigns Servos to treads.
             {
                 _treadL = new Servo(left);
                 _treadR = new Servo(right);
@@ -135,13 +140,11 @@ namespace Robot_v100
                         _treadL.Value = 2000;
                         _treadR.Value = 2000;
                         break;
-
-
                 }
                 Thread.Sleep(duration);
                 Stop();
             }
-            public void Rotate(double degrees)
+            public void Rotate(double degrees) // unfinished
             {
                 _parent.MyBrain.UpdateCompass();
                 double newHeading = _parent.MyBrain.Heading + degrees;
@@ -174,8 +177,8 @@ namespace Robot_v100
             /// Drive straight either forward or backwards.
             /// </summary>
             /// <param name="dir">Which direction to drive</param>
-            /// <param name="duration">How far to drive</param>
-            public void Drive(MoveDirection dir, int duration)
+            /// <param name="duration">How long to drive</param>
+            public void Drive(MoveDirection dir, int duration) // Drive for time method
             {
 
                 switch (dir)
@@ -194,11 +197,35 @@ namespace Robot_v100
                 Thread.Sleep(duration);
                 Stop();
             }
-            public void Drive(MoveDirection dir, double cm)
+            /// <summary>
+            /// Drive straight either forward or backwards.
+            /// </summary>
+            /// <param name="dir">Which direction to drive</param>
+            /// <param name="cm">How far to drive</param>
+            public void Drive(MoveDirection dir, double cm) // Drive for distance method, unfinished
             {
 
+                double distanceNow = _parent.MyBrain.Distance;
+                switch (dir)
+                {
+                    case MoveDirection.Fwd:
+                        _treadL.Value = 1000;
+
+                        _treadR.Value = 2000;
+                        break;
+                    case MoveDirection.Back:
+                        _treadL.Value = 2000;
+
+                        _treadR.Value = 1000;
+                        break;
+                }
+
+                while (distanceNow < cm)
+                {
+
+                }
             }
-            public void Stop()
+            public void Stop() // Stop method
             {
                 _treadL.Value = Servo.OFF_VALUE;
                 _treadR.Value = Servo.OFF_VALUE;
@@ -211,6 +238,9 @@ namespace Robot_v100
             {
                 _sensor = new HC_SR04((Cpu.Pin)trigger, (Cpu.Pin)echo);
             }
+            /// <summary>
+            /// Reads distance and converts it to cm.
+            /// </summary>
             public double CurrentDistance
             {
                 get
@@ -238,12 +268,11 @@ namespace Robot_v100
             MyTreads = new Treads(this, servoLPin, servoRPin);
             MyBrain = new Brain(this, new SonarSensor(rangeTriggerPin, rangeEchoPin), new HMC_6343());
         }
-        public void RobotLoop()
+        public void RobotLoop() // Do robot stuff here.
         {
             while (true)
             {
-                //MyBrain.;
-                
+                MyBrain.UpdateCompass();
             }
         }
     }
@@ -251,9 +280,9 @@ namespace Robot_v100
     {
         public static void Main()
         {
-            Robot robot = new Robot(FEZ_Pin.PWM.Di9, FEZ_Pin.PWM.Di8, FEZ_Pin.Digital.Di4, FEZ_Pin.Digital.Di5);
+            Robot robot = new Robot(FEZ_Pin.PWM.Di9, FEZ_Pin.PWM.Di8, FEZ_Pin.Digital.Di4, FEZ_Pin.Digital.Di5);// Pin assignment.
             robot.RobotLoop();
-            
+
         }
     }
 }
