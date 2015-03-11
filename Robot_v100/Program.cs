@@ -278,7 +278,7 @@ namespace Robot_v100
               Debug.Print("Compass heading: " + MyBrain.Heading.ToString()); // should print the compass heading.
               Debug.Print("Compass pitch: " + MyBrain.Pitch.ToString());
               Debug.Print("Compass roll: " + MyBrain.Roll.ToString());
-
+            
 
         }
 
@@ -292,6 +292,7 @@ namespace Robot_v100
 
             while (true)
             {
+               
                 // Debug.Print("Hello!");
                 robot.RobotLoop();
                 Thread.Sleep(500);

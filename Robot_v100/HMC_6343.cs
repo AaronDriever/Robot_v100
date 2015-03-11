@@ -12,8 +12,26 @@ namespace HMC_6343
         const int DELAY = 100;
 
         //Write buffer
-        byte[] headingCommand = new byte[] { 0x50 }; // Read bearing command
-
+        byte[] headingCommand = new byte[] { 0x50 };             // Read bearing command
+        // newly added
+        byte[] accelCommand = new byte[] { 0x40 };               // Post Accel Data: AxMSB, AxLSB, AyMSB, AyLSB, AzMSB, AzLSB
+        byte[] magCommand = new byte[] { 0x45 };                 // Post Mag Data: MxMSB, MxLSB, MyMSB, MyLSB, MzMSB, MzLSB
+        byte[] tiltCommand = new byte[] { 0x55 };                // Post Tilt Data: PitchMSB, PitchLSB, RollMSB, RollLSB, TempMSB, TempLSB
+        byte[] op1Command = new byte[] { 0x65 };                 // Post OP Mode 1: Read the current value of OP Mode 1 register
+        byte[] enterCalCommand = new byte[] { 0x71 };            // Enter User Calibration Mode
+        byte[] exitCalCommand = new byte[] { 0x7E };             // Exit User Calibration Mode
+        byte[] levelCommand = new byte[] { 0x72 };               // Level Orientation (X=forward, +Z=up) (default)                     
+        byte[] uprightsidewaysCommand = new byte[] { 0x73 };     // Upright Sideways Orientation (X=forward, Y=up)   
+        byte[] uprightflatfrontCommand = new byte[] { 0x74 };    // Upright Flat Front Orientation (Z=forward, -X=up)
+        byte[] runCommand = new byte[] { 0x75 };                 // Enter Run Mode (from Standby Mode)
+        byte[] standbyCommand = new byte[] { 0x76 };             // Enter Standby Mode (from Run Mode)
+        byte[] resetCommand = new byte[] { 0x82 };               // Reset the Processor
+        byte[] entersleepCommand = new byte[] { 0x83 };          // Enter Sleep Mode (from Run Mode)
+        byte[] exitsleepCommand = new byte[] { 0x84 };           // Exit Sleep Mode (to Standby Mode)
+        //
+        byte[] readEEPromCommand = new byte[] { 0xE1 };          //EEPROM Address  Response Bytes (Binary), Data (1 Byte) Read from EEPROM
+        byte[] writeEEPromCommand = new byte[] { 0xF1 };         //EEPROM Address  Argument 2 Byte (Binary), Data Write to EEPROM
+        //
         //Read buffer
         private byte[] inBuffer = new byte[6]; // Six bytes, MSB followed by LSB for each heading, pitch and roll
 
@@ -55,22 +73,38 @@ namespace HMC_6343
         readonly I2CDevice.I2CTransaction[] _txnPostHeading;
         readonly I2CDevice.I2CTransaction[] _txnPostAccel;
         readonly I2CDevice.I2CTransaction[] _txnReadData;
-
+        //newly added
+        readonly I2CDevice.I2CTransaction[] magTrans;
+        readonly I2CDevice.I2CTransaction[] tiltTrans;
+        readonly I2CDevice.I2CTransaction[] op1Trans;
+        readonly I2CDevice.I2CTransaction[] enterCalTrans;
+        readonly I2CDevice.I2CTransaction[] exitCalTrans;
+        static I2CDevice.I2CTransaction[] levelTrans;
+        readonly I2CDevice.I2CTransaction[] uprightsidewaysTrans;
+        readonly I2CDevice.I2CTransaction[] uprightflatfrontTrans;
+        readonly I2CDevice.I2CTransaction[] runTrans;
+        readonly I2CDevice.I2CTransaction[] standbyTrans;
+        readonly I2CDevice.I2CTransaction[] resetTrans;
+        readonly I2CDevice.I2CTransaction[] entersleepTrans;
+        readonly I2CDevice.I2CTransaction[] exitsleepTrans;
+        //EEProm Read/Write
+        readonly I2CDevice.I2CTransaction[] writeEEPromTrans;
+        readonly I2CDevice.I2CTransaction[] readEEPromTrans;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HMC6343"/> class.
         /// </summary>
         public HMC_6343()
         {
-       
+            Thread.Sleep(500);
             _deviceInterface = new I2CDevice(new I2CDevice.Configuration((ushort)HMC6343_ADDRESS, CLOCK_FREQ));
-                 Thread.Sleep(500);
+            levelTrans = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(levelCommand) };
             _txnPostHeading = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(headingCommand) };
-            _txnPostAccel = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(new byte[] { 0x40 }) };
+            _txnPostAccel = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(accelCommand) };
             _txnReadData = new I2CDevice.I2CTransaction[] { I2CDevice.CreateReadTransaction(inBuffer) };
-            byte[] opBuffer=new byte[1];
+            byte[] opBuffer = new byte[1];
 
-            
+
         }
 
         /// <summary>
@@ -82,7 +116,7 @@ namespace HMC_6343
         }
         private void _decodeHeading(byte[] buffer)
         {
-            int heading= (int)(((ushort)buffer[0]) << 8 | (ushort)buffer[1]);
+            int heading = (int)(((ushort)buffer[0]) << 8 | (ushort)buffer[1]);
             int pitch = (int)(((ushort)buffer[2]) << 8 | (ushort)buffer[3]);
             int roll = (int)(((ushort)buffer[4]) << 8 | (ushort)buffer[5]);
             Heading = heading / 10.0f;
@@ -110,7 +144,7 @@ namespace HMC_6343
         {
             _deviceInterface.Execute(_txnPostHeading, DELAY);
             Thread.Sleep(1);  // Give the compass the requested 1ms delay before reading
-            int i=_deviceInterface.Execute(_txnReadData, DELAY);
+            int i = _deviceInterface.Execute(_txnReadData, DELAY);
             _decodeHeading(inBuffer);
 
             _deviceInterface.Execute(_txnPostAccel, DELAY);
@@ -119,6 +153,9 @@ namespace HMC_6343
             _decodeAccel(inBuffer);
 
         }
+        public void Setup()
+        {
 
+        }
     }
 }

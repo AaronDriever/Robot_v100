@@ -32,6 +32,7 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="HC_SR04.cs" />
+    <Compile Include="HMC6343_alt.cs" />
     <Compile Include="HMC_6343.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
