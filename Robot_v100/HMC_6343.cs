@@ -29,8 +29,15 @@ namespace HMC_6343
         byte[] entersleepCommand = new byte[] { 0x83 };          // Enter Sleep Mode (from Run Mode)
         byte[] exitsleepCommand = new byte[] { 0x84 };           // Exit Sleep Mode (to Standby Mode)
         //
-        byte[] readEEPromCommand = new byte[] { 0xE1 };          //EEPROM Address  Response Bytes (Binary), Data (1 Byte) Read from EEPROM
-        byte[] writeEEPromCommand = new byte[] { 0xF1 };         //EEPROM Address  Argument 2 Byte (Binary), Data Write to EEPROM
+        byte[] readEEPromCommand = new byte[] { 0xE1 };          // EEPROM Address  Response Bytes (Binary), Data (1 Byte) Read from EEPROM
+        byte[] writeEEPromCommand = new byte[] { 0xF1 };         // EEPROM Address  Argument 2 Byte (Binary), Data Write to EEPROM
+        //
+        byte[] X_OffsetLSB = new byte[] { 0x0E };                // Hard-Iron Calibration Offset for the X-axis
+        byte[] X_OffsetMSB = new byte[] { 0x0F };
+        byte[] Y_OffsetLSB = new byte[] { 0x10 };
+        byte[] Y_OffsetMSB = new byte[] { 0x11 };
+        byte[] Z_OffsetLSB = new byte[] { 0x12 };
+        byte[] Z_OffsetMSB = new byte[] { 0x13 };
         //
         //Read buffer
         private byte[] inBuffer = new byte[6]; // Six bytes, MSB followed by LSB for each heading, pitch and roll
@@ -88,8 +95,16 @@ namespace HMC_6343
         readonly I2CDevice.I2CTransaction[] entersleepTrans;
         readonly I2CDevice.I2CTransaction[] exitsleepTrans;
         //EEProm Read/Write
-        readonly I2CDevice.I2CTransaction[] writeEEPromTrans;
+        static I2CDevice.I2CTransaction[] writeEEPromTrans;
         readonly I2CDevice.I2CTransaction[] readEEPromTrans;
+        //
+        static I2CDevice.I2CTransaction[] x_offsetmsb;
+        static I2CDevice.I2CTransaction[] x_offsetlsb;
+        static I2CDevice.I2CTransaction[] y_offsetmsb;
+        static I2CDevice.I2CTransaction[] writeEEPromTrans;
+        static I2CDevice.I2CTransaction[] writeEEPromTrans;
+        static I2CDevice.I2CTransaction[] writeEEPromTrans;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HMC6343"/> class.
@@ -98,13 +113,16 @@ namespace HMC_6343
         {
             Thread.Sleep(500);
             _deviceInterface = new I2CDevice(new I2CDevice.Configuration((ushort)HMC6343_ADDRESS, CLOCK_FREQ));
+            /*
             levelTrans = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(levelCommand) };
             _txnPostHeading = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(headingCommand) };
             _txnPostAccel = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(accelCommand) };
             _txnReadData = new I2CDevice.I2CTransaction[] { I2CDevice.CreateReadTransaction(inBuffer) };
             byte[] opBuffer = new byte[1];
-
-
+            */
+           // writeEEPromTrans = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(writeEEPromCommand) };
+        
+        
         }
 
         /// <summary>
@@ -153,9 +171,9 @@ namespace HMC_6343
             _decodeAccel(inBuffer);
 
         }
-        public void Setup()
+        public void ZeroOut()
         {
-
+            
         }
     }
 }
