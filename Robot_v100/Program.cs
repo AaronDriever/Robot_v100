@@ -247,11 +247,14 @@ namespace Robot_v100
                 {
                     double Distance = -1;
                     Debug.Print("Ping");
+
                     long ticks = _sensor.Ping();
+                    //Debug.Print(ticks.ToString());
                     if (ticks > 0L)
                     {
                         double centimeters = _sensor.TicksToInches(ticks) * 2.54;
                         Debug.Print("Distance CM: " + centimeters.ToString());
+
                         Distance = centimeters; //centimeters
                     }
                     return Distance;
@@ -270,10 +273,13 @@ namespace Robot_v100
         }
         public void RobotLoop() // Do robot stuff here.
         {
-            while (true)
-            {
+            MyBrain.Distance.ToString();
+            MyBrain.UpdateCompass();
+              Debug.Print("Compass heading: " + MyBrain.Heading.ToString()); // should print the compass heading.
+              Debug.Print("Compass pitch: " + MyBrain.Pitch.ToString());
+              Debug.Print("Compass roll: " + MyBrain.Roll.ToString());
 
-            }
+
         }
 
     }
@@ -283,8 +289,13 @@ namespace Robot_v100
         public static void Main()
         {
             Robot robot = new Robot(FEZ_Pin.PWM.Di9, FEZ_Pin.PWM.Di8, FEZ_Pin.Digital.Di4, FEZ_Pin.Digital.Di5);// Pin assignment.
-            robot.RobotLoop();
 
+            while (true)
+            {
+                // Debug.Print("Hello!");
+                robot.RobotLoop();
+                Thread.Sleep(500);
+            }
         }
     }
 }
