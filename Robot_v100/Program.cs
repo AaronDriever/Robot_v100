@@ -296,6 +296,7 @@ namespace Robot_v100
                 // Debug.Print("Hello!");
                 robot.RobotLoop();
                 Thread.Sleep(500);
+                
             }
         }
     }
