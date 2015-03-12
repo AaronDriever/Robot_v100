@@ -30,7 +30,7 @@ namespace HMC_6343
         byte[] exitsleepCommand = new byte[] { 0x84 };           // Exit Sleep Mode (to Standby Mode)
         //
         byte[] readEEPromCommand = new byte[] { 0xE1 };          // EEPROM Address  Response Bytes (Binary), Data (1 Byte) Read from EEPROM
-        byte[] writeEEPromCommand = new byte[] { 0xF1, 0x0E, };         // EEPROM Address  Argument 2 Byte (Binary), Data Write to EEPROM
+        byte[] writeEEPromCommand = new byte[] { 0xF1 };         // EEPROM Address  Argument 2 Byte (Binary), Data Write to EEPROM
         //
         byte[] X_OffsetLSB = new byte[] { 0x0E };                // Hard-Iron Calibration Offset for the X-axis
         byte[] X_OffsetMSB = new byte[] { 0x0F };
@@ -117,17 +117,56 @@ namespace HMC_6343
         {
             Thread.Sleep(500);
             _deviceInterface = new I2CDevice(new I2CDevice.Configuration((ushort)HMC6343_ADDRESS, CLOCK_FREQ));
-            
-            levelTrans = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(levelCommand) };
+            Thread.Sleep(1);
+            //levelTrans = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(levelCommand) };
             _txnPostHeading = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(headingCommand) };
             _txnPostAccel = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(accelCommand) };
             _txnReadData = new I2CDevice.I2CTransaction[] { I2CDevice.CreateReadTransaction(inBuffer) };
-            byte[] opBuffer = new byte[1];
-            /*
-            writeEEPromTrans = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(writeEEPromCommand) };
-            z_offsetlsb = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(Z_OffsetLSB) };
-            Z_ero = new I2CDevice.I2CTransaction[] { I2CDevice.CreateWriteTransaction(z_ero) };
-*/
+            byte[] opMode1 = new byte[1];
+
+            //var PostOpModeOneTransaction = I2CDevice.CreateWriteTransaction(new byte[] { 0x65 });
+            //var ReadOpModeOneTransaction = I2CDevice.CreateReadTransaction(opMode1);
+
+            var WriteModeTransaction = I2CDevice.CreateWriteTransaction(new byte[] { 0x72 });
+
+            var WriteEeprom1 = I2CDevice.CreateWriteTransaction(new byte[] { 0xF1, 0x0E, 0x00 });
+            var WriteEeprom2 = I2CDevice.CreateWriteTransaction(new byte[] { 0xF1, 0x0F, 0x00 });
+            var WriteEeprom3 = I2CDevice.CreateWriteTransaction(new byte[] { 0xF1, 0x10, 0x00 });
+            var WriteEeprom4 = I2CDevice.CreateWriteTransaction(new byte[] { 0xF1, 0x11, 0x00 });
+            var WriteEeprom5 = I2CDevice.CreateWriteTransaction(new byte[] { 0xF1, 0x12, 0x00 });
+            var WriteEeprom6 = I2CDevice.CreateWriteTransaction(new byte[] { 0xF1, 0x13, 0x00 });
+
+            var StartCAl = I2CDevice.CreateWriteTransaction(new byte[] { 0x71 });
+            var EndCAL = I2CDevice.CreateWriteTransaction(new byte[] { 0x7E });
+
+            _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { WriteModeTransaction }, 1000);
+             Debug.Print("Start calibrating");
+             Thread.Sleep(100);
+            _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { StartCAl }, 1000);
+             Thread.Sleep(15000);
+             _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { EndCAL }, 1000);
+             Debug.Print("End of calibration");
+
+            // _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { WriteEeprom2 }, 1000);
+            //Thread.Sleep(100);
+
+            //_deviceInterface.Execute(new I2CDevice.I2CTransaction[] { WriteEeprom3 }, 1000);
+            // Thread.Sleep(100);
+
+            //_deviceInterface.Execute(new I2CDevice.I2CTransaction[] { WriteEeprom4 }, 1000);
+            //Thread.Sleep(100);
+
+            //_deviceInterface.Execute(new I2CDevice.I2CTransaction[] { WriteEeprom5 }, 1000);
+            //Thread.Sleep(100);
+
+            //_deviceInterface.Execute(new I2CDevice.I2CTransaction[] { WriteEeprom6 }, 1000);
+            //_deviceInterface.Execute(new I2CDevice.I2CTransaction[] { PostOpModeOneTransaction }, 1000);
+            //Thread.Sleep(1000);
+            //_deviceInterface.Execute(new I2CDevice.I2CTransaction[] { ReadOpModeOneTransaction }, 1000);
+            //Thread.Sleep(1000);
+            //Debug.Print("Operation Mode 1: " + opMode1[0].ToString());
+
+
 
 
 
