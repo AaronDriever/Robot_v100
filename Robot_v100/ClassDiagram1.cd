@@ -3,7 +3,7 @@
   <Class Name="HMC_6343.HMC_6343" Collapsed="true">
     <Position X="0.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAACAAAAAAADAAQQCAAAAAJAgAEADAACAAgAA=</HashCode>
+      <HashCode>BAwAYQIQAGAAgAQQFDESQQCiAEASJEkAFwTEgiQ4gKA=</HashCode>
       <FileName>HMC_6343.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -26,13 +26,6 @@
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
       <FileName>Program.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="D2523.D2523" Collapsed="true">
-    <Position X="0.5" Y="2" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D2523.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Enum Name="Robot_v100.MoveDirection" Collapsed="true">

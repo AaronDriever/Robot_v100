@@ -1,9 +1,12 @@
 ﻿using System;
+using System.IO;
+using Microsoft.SPOT.IO;
 using System.Threading;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
 using GHIElectronics.NETMF.FEZ;
 using GHIElectronics.NETMF.Hardware;
+using System.IO.Ports;
 
 // pins:
 // Servo pins: Di8, Di7
@@ -14,8 +17,11 @@ using GHIElectronics.NETMF.Hardware;
 
 namespace Robot_v100
 {
+
     using HC_SR04; // HC_SR04 Sonar sensor
     using HMC_6343; // HMC_6343 Compass module
+    using COM_GPS; // GPS 
+
     public enum MoveDirection
     {
         Fwd, Back
@@ -33,13 +39,14 @@ namespace Robot_v100
             Robot _parent;
             SonarSensor _sonar;
             HMC_6343 _compass;
+            COM_GPS _gps;
 
-
-            public Brain(Robot parent, SonarSensor sensor, HMC_6343 compass) // Brain sensor assignments
+            public Brain(Robot parent, SonarSensor sensor, HMC_6343 compass, COM_GPS gps) // Brain sensor assignments
             {
                 _parent = parent;
                 _sonar = sensor;
                 _compass = compass;
+                _gps = gps;
             }
             public double FreeSpaceFwd // not sure yet
             {
@@ -92,6 +99,12 @@ namespace Robot_v100
             {
 
             }
+            public void MyLocation()
+            {
+                _gps.Date.ToString();
+            }
+
+
         }
         public class Servo
         {
@@ -127,35 +140,43 @@ namespace Robot_v100
                 _treadL = new Servo(left);
                 _treadR = new Servo(right);
             }
-            public void Rotate(RotateDirection dir, int duration)
+            public void Rotate(RotateDirection dir)//, int duration
             {
                 switch (dir)
                 {
                     case RotateDirection.CW:
-                        _treadL.Value = 1000;
-                        _treadR.Value = 1000;
+                        _treadL.Value = 1486;
+                        _treadR.Value = 1454;
 
                         break;
                     case RotateDirection.CCW:
-                        _treadL.Value = 2000;
-                        _treadR.Value = 2000;
+                        _treadL.Value = 1606;
+                        _treadR.Value = 1574;
                         break;
                 }
-                Thread.Sleep(duration);
-                Stop();
+                //Thread.Sleep(duration);
+                //Stop();
             }
-            public void Rotate(double degrees) // unfinished
+            public void RotateDegrees(RotateDirection dir, double degrees) // rotate a given direction for a given degrees
             {
+                Robot _parent = new Robot(FEZ_Pin.PWM.Di9, FEZ_Pin.PWM.Di8, FEZ_Pin.Digital.Di4, FEZ_Pin.Digital.Di5);
                 _parent.MyBrain.UpdateCompass();
-                double newHeading = _parent.MyBrain.Heading + degrees;
-                if (newHeading > 360)
+                double currentHeading = _parent.MyBrain.Heading;
+
+                double newHeading = currentHeading + degrees;
+                if (currentHeading < newHeading)
                 {
+                    _parent.MyTreads.Rotate(RotateDirection.CW);
+                }
+                if (currentHeading > newHeading)
+                {
+                    _parent.MyTreads.Rotate(RotateDirection.CCW);
                 }
             }
             public void RotateTo(RotateDirection dir, double toAngle)
             {
                 //Figure out current difference between current heading and desired heading;
-                _parent.MyBrain.UpdateCompass();
+
                 double dA = _parent.MyBrain.Heading - toAngle;
 
                 //While we're not within 5 degrees of our desired heading, we use the square of the values for speed, since we don't have an Abs(double) method and we don't want
@@ -164,11 +185,11 @@ namespace Robot_v100
                 {
                     if (dA > 0)
                     {
-                        Rotate(RotateDirection.CCW, 100);
+                        Rotate(RotateDirection.CCW);
                     }
                     else
                     {
-                        Rotate(RotateDirection.CW, 100);
+                        Rotate(RotateDirection.CW);
                     }
                     _parent.MyBrain.UpdateCompass();
                 }
@@ -178,7 +199,7 @@ namespace Robot_v100
             /// </summary>
             /// <param name="dir">Which direction to drive</param>
             /// <param name="duration">How long to drive</param>
-            public void Drive(MoveDirection dir, int duration) // Drive for time method
+            public void DriveForTime(MoveDirection dir, int duration) // Drive for time method
             {
 
                 switch (dir)
@@ -202,7 +223,7 @@ namespace Robot_v100
             /// </summary>
             /// <param name="dir">Which direction to drive</param>
             /// <param name="cm">How far to drive</param>
-            public void Drive(MoveDirection dir, double cm) // Drive for distance method, unfinished
+            public void DriveForDistance(MoveDirection dir, double cm) // Drive for distance method, unfinished
             {
 
                 double distanceNow = _parent.MyBrain.Distance;
@@ -220,10 +241,23 @@ namespace Robot_v100
                         break;
                 }
 
-                while (distanceNow < cm)
+            }
+            public void Drive(MoveDirection dir) // Drive for distance method, unfinished
+            {
+                switch (dir)
                 {
+                    case MoveDirection.Fwd:
+                        _treadL.Value = 1000;
 
+                        _treadR.Value = 2000;
+                        break;
+                    case MoveDirection.Back:
+                        _treadL.Value = 2000;
+
+                        _treadR.Value = 1000;
+                        break;
                 }
+
             }
             public void Stop() // Stop method
             {
@@ -246,19 +280,29 @@ namespace Robot_v100
                 get
                 {
                     double Distance = -1;
-                    Debug.Print("Ping");
+                    //Debug.Print("Ping");
 
                     long ticks = _sensor.Ping();
                     //Debug.Print(ticks.ToString());
                     if (ticks > 0L)
                     {
                         double centimeters = _sensor.TicksToInches(ticks) * 2.54;
-                        Debug.Print("Distance CM: " + centimeters.ToString());
+                        //Debug.Print("Distance CM: " + centimeters.ToString());
 
                         Distance = centimeters; //centimeters
                     }
                     return Distance;
                 }
+            }
+        }
+        public class MyLocation
+        {
+            COM_GPS _gps;
+            public MyLocation()
+            {
+
+                while (true)
+                    Debug.Print(_gps.FixTime.ToString());
             }
         }
         private double _distanceR;
@@ -269,20 +313,64 @@ namespace Robot_v100
         public Robot(FEZ_Pin.PWM servoRPin, FEZ_Pin.PWM servoLPin, FEZ_Pin.Digital rangeTriggerPin, FEZ_Pin.Digital rangeEchoPin)
         {
             MyTreads = new Treads(this, servoLPin, servoRPin);
-            MyBrain = new Brain(this, new SonarSensor(rangeTriggerPin, rangeEchoPin), new HMC_6343());
+            MyBrain = new Brain(this, new SonarSensor(rangeTriggerPin, rangeEchoPin), new HMC_6343(), new COM_GPS("COM4", 4800));
         }
+
+
+
+
         public void RobotLoop() // Do robot stuff here.
         {
-            MyBrain.Distance.ToString();
-            MyBrain.UpdateCompass();
-              Debug.Print("Compass heading: " + MyBrain.Heading.ToString()); // should print the compass heading.
-              Debug.Print("Compass pitch: " + MyBrain.Pitch.ToString());
-              Debug.Print("Compass roll: " + MyBrain.Roll.ToString());
+            //MyBrain.Distance.ToString();
+            //MyBrain.MyLocation();
+
+
+            //While we're not within 5 degrees of our desired heading, we use the square of the values for speed, since we don't have an Abs(double) method and we don't want
+            //to use any sort of sqrt procedure         
+
             
+
+             
+
+
+            // MyTreads.Stop()
+            double numToEnter = 200;
+            double sum = 0;
+            double average = 0;
+            double input;
+            //int someavg = (int)average;
+
+            // Get 10 numbers from the user
+            for (int i = 0; i != numToEnter; ++i)
+            {
+                input = MyBrain.Heading;
+
+                sum += input;
+            }
+
+            // Get average and print it
+            average = sum / numToEnter;
+            
+            Debug.Print("The average Heading is: " + (int)average);
+
+            //double[] arr = new double[5] { MyBrain.Heading, MyBrain.Heading, MyBrain.Heading, MyBrain.Heading, MyBrain.Heading };
+             double currentHeading = (int)average;
+
+             double newHeading = 300;
+             if (currentHeading < newHeading + 5)
+             {
+                 MyTreads.Rotate(RotateDirection.CW);
+             }
+             if (currentHeading > newHeading - 5)
+             {
+                 MyTreads.Rotate(RotateDirection.CCW);
+             }
+
 
         }
 
     }
+
 
     public class Program
     {
@@ -292,15 +380,23 @@ namespace Robot_v100
 
             while (true)
             {
+                 robot.MyBrain.UpdateCompass();
+                Debug.Print("The Real    Heading is: " + robot.MyBrain.Heading.ToString());
                
-                // Debug.Print("Hello!");
+                //Debug.Print("Compass heading: " + robot.MyBrain.Heading.ToString()); // should print the compass heading.
+                // Debug.Print("Compass pitch: " + MyBrain.Pitch.ToString());
+                // Debug.Print("Compass roll: " + MyBrain.Roll.ToString());
+                // Debug.Print("Distance CM:" + MyBrain.Distance.ToString());
                 robot.RobotLoop();
-                Thread.Sleep(500);
-                
+
+
+
+
             }
         }
     }
 }
+
 /*
  The End!
 */

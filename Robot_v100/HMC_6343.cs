@@ -136,16 +136,9 @@ namespace HMC_6343
             var WriteEeprom5 = I2CDevice.CreateWriteTransaction(new byte[] { 0xF1, 0x12, 0x00 });
             var WriteEeprom6 = I2CDevice.CreateWriteTransaction(new byte[] { 0xF1, 0x13, 0x00 });
 
-            var StartCAl = I2CDevice.CreateWriteTransaction(new byte[] { 0x71 });
-            var EndCAL = I2CDevice.CreateWriteTransaction(new byte[] { 0x7E });
 
             _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { WriteModeTransaction }, 1000);
-             Debug.Print("Start calibrating");
-             Thread.Sleep(100);
-            _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { StartCAl }, 1000);
-             Thread.Sleep(15000);
-             _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { EndCAL }, 1000);
-             Debug.Print("End of calibration");
+
 
             // _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { WriteEeprom2 }, 1000);
             //Thread.Sleep(100);
@@ -165,7 +158,6 @@ namespace HMC_6343
             //_deviceInterface.Execute(new I2CDevice.I2CTransaction[] { ReadOpModeOneTransaction }, 1000);
             //Thread.Sleep(1000);
             //Debug.Print("Operation Mode 1: " + opMode1[0].ToString());
-
 
 
 
@@ -218,8 +210,17 @@ namespace HMC_6343
             _decodeAccel(inBuffer);
 
         }
-        public void ZeroOut()
+        public void compassCal()
         {
+            var StartCAl = I2CDevice.CreateWriteTransaction(new byte[] { 0x71 });
+            var EndCAL = I2CDevice.CreateWriteTransaction(new byte[] { 0x7E });
+
+            Debug.Print("Start calibrating");
+            Thread.Sleep(100);
+            _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { StartCAl }, 1000);
+            Thread.Sleep(15000);
+            _deviceInterface.Execute(new I2CDevice.I2CTransaction[] { EndCAL }, 1000);
+            Debug.Print("End of calibration");
 
         }
     }
